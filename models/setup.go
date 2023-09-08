@@ -1,0 +1,44 @@
+package models
+
+import (
+	"database/sql"
+	"fmt"
+	"log"
+	"os"
+
+	"github.com/go-sql-driver/mysql"
+)
+
+var db *sql.DB
+
+func connectDB() {
+	// configs
+	cfg := mysql.Config{
+		User:   os.Getenv("DBUSER"),
+		Passwd: os.Getenv("DBPASS"),
+		Net:    "tcp",
+		Addr:   "127.0.0.1:3306",
+		DBName: "saved_bookmarks",
+	}
+
+	// fetch connection
+	var err error
+	db, err = sql.Open("mysql", cfg.FormatDSN())
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	pingErr := db.Ping()
+	if pingErr != nil {
+		log.Fatal(pingErr)
+	}
+	fmt.Println("Connected!")
+
+	bookmarks, err := allBookmarks()
+
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	fmt.Printf("Found Bookmarks: %v\n", bookmarks)
+}
